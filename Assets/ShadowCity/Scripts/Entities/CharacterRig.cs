@@ -41,9 +41,18 @@ namespace ShadowCity
             var ai = ModelLibrary.TrySpawn(id, root.transform);
             if (ai != null)
             {
+                rig.animator = CharacterAnimator.TryAttach(ai);
+                if (rig.animator == null)
+                {
+                    // No Mixamo animation controller yet → the GLB is a frozen
+                    // T-pose statue. The procedural rig (analytic gait) looks
+                    // far better in motion, so use it until rigging is done.
+                    Object.Destroy(ai);
+                    rig.BuildBody(Palettes[Mathf.Abs(palette) % Palettes.Length], police);
+                    return rig;
+                }
                 rig.hasAIModel = true;
                 rig.aiModel = ai.transform;
-                rig.animator = CharacterAnimator.TryAttach(ai);
                 // build the procedural rig too but hide it: limb transforms
                 // still drive gameplay poses (sitting offsets etc.)
                 rig.BuildBody(Palettes[Mathf.Abs(palette) % Palettes.Length], police);

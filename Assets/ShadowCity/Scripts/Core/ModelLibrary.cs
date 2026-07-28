@@ -25,7 +25,21 @@ namespace ShadowCity
             // strip any colliders the importer added — gameplay owns collision
             foreach (var c in go.GetComponentsInChildren<Collider>(true))
                 Object.Destroy(c);
+            // Replace importer materials: glTFast's "glTF/*" shaders get
+            // stripped from player builds (nothing references them at build
+            // time) → magenta models. Our models carry all color in vertex
+            // colors, so the always-included VertexColorLit shader is exact.
+            foreach (var r in go.GetComponentsInChildren<Renderer>(true))
+                r.sharedMaterial = VertexColorMat();
             return go;
+        }
+
+        static Material vcMat;
+        static Material VertexColorMat()
+        {
+            if (vcMat == null)
+                vcMat = new Material(ShaderLib.VertexColorLit) { color = Color.white };
+            return vcMat;
         }
 
         public static bool Has(string id) =>
