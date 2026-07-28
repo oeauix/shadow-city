@@ -2,10 +2,11 @@
      Managed code stripping removes MeshCollider because nothing references it
      directly (GameObject.CreatePrimitive adds it reflectively for
      Plane/Sphere/Cylinder) → "class 'MeshCollider' doesn't exist" in builds
-     and the ground loses its collider. Preserve the physics + particle
-     modules wholesale (tiny size cost, total safety). -->
+     and the ground loses its collider. Preserve physics + particles wholesale.
+     NOTE: do NOT preserve UnityEngine.AudioModule with preserve="all" —
+     on WebGL it drags in FMOD-only symbols (verifyAudibilities) that don't
+     exist in the Emscripten audio backend and the link step fails. -->
 <linker>
   <assembly fullname="UnityEngine.PhysicsModule" preserve="all" />
   <assembly fullname="UnityEngine.ParticleSystemModule" preserve="all" />
-  <assembly fullname="UnityEngine.AudioModule" preserve="all" />
 </linker>
