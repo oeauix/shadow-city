@@ -1,0 +1,24 @@
+# ============================================================================
+# SHADOW CITY — one-time Unity license activation file request
+# Run manually: Actions tab → "Acquire activation file" → Run workflow
+# Then: download artifact → extract .alf → upload at license.unity3d.com/manual
+# → download .ulf → paste its full text into repo Secret UNITY_LICENSE
+# ============================================================================
+name: Acquire activation file
+on:
+  workflow_dispatch: {}
+jobs:
+  activation:
+    name: Request manual activation file 🔑
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request manual activation file
+        id: getManualLicenseFile
+        uses: game-ci/unity-request-activation-file@v2
+        with:
+          unityVersion: 2022.3.22f1
+      - name: Expose as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.getManualLicenseFile.outputs.filePath }}
+          path: ${{ steps.getManualLicenseFile.outputs.filePath }}

@@ -1,0 +1,64 @@
+# ============================================================================
+# SHADOW CITY — cloud build: WebGL (auto-deployed to GitHub Pages) + Android APK
+# Trigger: every push to main, or manual run.
+# Requires repo Secrets: UNITY_LICENSE, UNITY_EMAIL, UNITY_PASSWORD
+# ============================================================================
+name: Build ShadowCity
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write   # needed to push the WebGL build to gh-pages
+
+jobs:
+  build:
+    name: Build ${{ matrix.targetPlatform }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform: [WebGL, Android]
+    steps:
+      - uses: actions/checkout@v4
+        with: { lfs: true }
+
+      # Library cache — makes subsequent builds ~3-4x faster
+      - uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-${{ matrix.targetPlatform }}-
+            Library-
+
+      # Android IL2CPP builds are big — free up runner disk first
+      - if: matrix.targetPlatform == 'Android'
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with: { android: true, tool-cache: true }
+
+      - uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: 2022.3.22f1
+          targetPlatform: ${{ matrix.targetPlatform }}
+          buildName: ShadowCity
+          androidExportType: androidPackage   # .apk for direct phone install
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ShadowCity-${{ matrix.targetPlatform }}
+          path: build/${{ matrix.targetPlatform }}
+
+      # WebGL → GitHub Pages: play in any browser at
+      #   https://<username>.github.io/<repo>/
+      # (unity-builder output path = build/<platform>/<buildName>/index.html)
+      - if: matrix.targetPlatform == 'WebGL'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: build/WebGL/ShadowCity

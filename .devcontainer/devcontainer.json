@@ -1,0 +1,17 @@
+{
+  "name": "ShadowCity Unity Editor (browser desktop)",
+  "image": "unityci/editor:ubuntu-2022.3.22f1-android-3",
+  "hostRequirements": { "cpus": 4, "memory": "16gb", "storage": "32gb" },
+  "features": {
+    "ghcr.io/devcontainers/features/desktop-lite:1": {
+      "password": "shadowcity",
+      "webPort": 6080,
+      "vncPort": 5901
+    }
+  },
+  "forwardPorts": [6080],
+  "portsAttributes": {
+    "6080": { "label": "Unity Desktop (noVNC)", "onAutoForward": "openBrowser" }
+  },
+  "postAttachCommand": "echo '=== Unity Editor is at /opt/unity/Editor/Unity — open the noVNC tab (port 6080, password: shadowcity), start a terminal in the desktop and run: /opt/unity/Editor/Unity -projectPath /workspaces/'$(basename $PWD)"
+}
