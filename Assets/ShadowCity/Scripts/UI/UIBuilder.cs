@@ -37,7 +37,14 @@ namespace ShadowCity
             Fa = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             var custom = Resources.Load<Font>("Vazirmatn-Regular");
             En = Fa;
-            if (custom != null) Fa = custom;
+            if (custom != null)
+            {
+                // Vazirmatn covers Latin too — use it everywhere so Persian
+                // strings (e.g. the language button while in English mode)
+                // never hit a font with no Arabic glyphs.
+                Fa = custom;
+                En = custom;
+            }
 
             canvas = gameObject.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
