@@ -368,8 +368,12 @@ namespace ShadowCity
 
         void SetBtn(GameObject root, string name, string text)
         {
-            var tr = root.transform.Find(name + "/" + name + "_t");
-            if (tr != null) { var t = tr.GetComponent<Text>(); t.text = text; t.font = FontFor(); }
+            // buttons are renamed after creation, so find by the button's final
+            // name and grab its Text child (label child keeps its original name)
+            var tr = root.transform.Find(name);
+            if (tr == null) return;
+            var t = tr.GetComponentInChildren<Text>(true);
+            if (t != null) { t.text = text; t.font = FontFor(); }
         }
 
         public void RefreshLabels()
